@@ -1,28 +1,28 @@
 import unittest
-from logic import TicTacToeGame, HumanPlayer, BotPlayer
+from logic import TicTacToe, Bot
 
 class TestTicTacToeGame(unittest.TestCase):
 
     def setUp(self):
-        self.player1 = HumanPlayer("X")
-        self.player2 = HumanPlayer("O")
-        self.bot = BotPlayer("O")
-        self.game = TicTacToeGame(self.player1, self.player2)
+        self.player1 = 'X'
+        self.player2 = 'O'
+        self.bot = Bot()
+        self.game = TicTacToe()
 
     def test_initial_board(self):
         expected_board = [[None, None, None], [None, None, None], [None, None, None]]
-        self.assertEqual(self.game.get_board(), expected_board, "Initial board should be empty")
+        self.assertEqual(self.game.board, expected_board, "Initial board should be empty")
 
     def test_play_turn(self):
         # Mock player input to control the test
-        self.player1.make_move = lambda board: (0, 0)
+        self.game.get_player_input = lambda: (0, 0)
         self.game.play_turn()
-        self.assertEqual(self.game.get_board()[0][0], "X", "First cell should be marked 'X'")
+        self.assertEqual(self.game.board[0][0], "X", "First cell should be marked 'X'")
 
         # Change turn to player 2 and play
-        self.player2.make_move = lambda board: (0, 1)
+        self.game.get_player_input = lambda: (0, 1)
         self.game.play_turn()
-        self.assertEqual(self.game.get_board()[0][1], "O", "Second cell should be marked 'O'")
+        self.assertEqual(self.game.board[0][1], "O", "Second cell should be marked 'O'")
 
     def test_get_winner(self):
         # Test for row, column, and diagonal wins
