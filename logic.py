@@ -10,6 +10,7 @@ class TicTacToe:
         self.move_number = 0
         self.first_move = True
         self.first_move_position = None
+
     def get_empty_board(self):
         return [[None, None, None] for _ in range(3)]
 
@@ -31,10 +32,7 @@ class TicTacToe:
 
     def add_move_number(self):
         self.move_number += 1
-        
-    
-        # with open('game_log.txt','a') as f:
-        #     f.write(f'Winner is {winner} in {move_number} moves\n')
+
     def check_winner(self):
         # Checking rows for winner
         for row in self.board:
@@ -63,36 +61,35 @@ class TicTacToe:
 
         return None
 
-    def play_game(self):
+    def play_turn(self):
         winner = None
-        while winner is None:
-            self.print_board()
-            try:
-                row, col = self.get_player_input()
-                if self.first_move:
-                    print("First move")
-                    self.first_move_position = (int(row), int(col))
-                    self.first_move = False
-                if self.board[row][col] is not None:
-                    print("Spot taken, try again.")
-                    continue
-            except (ValueError, IndexError):
-                print("Invalid input, try again.")
-                continue
-
-            self.board[row][col] = self.current_player
-            winner = self.check_winner()
-            self.switch_player()
-
         self.print_board()
+        try:
+            row, col = self.get_player_input()
+            if self.first_move:
+                print("First move")
+                self.first_move_position = (int(row), int(col))
+                self.first_move = False
+            if self.board[row][col] is not None:
+                print("Spot taken, try again.")
+                return
+        except (ValueError, IndexError):
+            print("Invalid input, try again.")
+            return
+
+        self.board[row][col] = self.current_player
+        winner = self.check_winner()
+        self.switch_player()
+
         if winner == "draw":
             print("It's a draw!")
-        else:
+        elif winner:
             print(f"Winner is Player {winner}!")
 
 class Bot:
     def make_move(self, board):
         empty_positions = [(i, j) for i in range(3) for j in range(3) if board[i][j] is None]
-        return random.choice(empty_positions)
+        return random.choice(empty_positions) if empty_positions else (0, 0)
+
 
 
