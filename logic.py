@@ -39,17 +39,31 @@ class TicTacToeGame:
         return all(all(cell is not None for cell in row) for row in self.board)
 
 class Player:
-    def __init__(self, marker):
+    def __init__(self, marker, name):
         self.marker = marker
+        self.name = name
+        self.first_move = None
+        self.outcome = None
+
+    def record_first_move(self, move, outcome):
+        self.first_move = move
+        self.outcome = outcome
 
     def make_move(self, board):
-        x, y = map(int, input(f"Enter the position of (x,y) for {self.marker}, split with comma: ").split(","))
+        x, y = map(int, input(f"{self.name}, enter the position of (x,y) for {self.marker}, split with comma: ").split(","))
         return x, y
 
 class Bot(Player):
     def make_move(self, board):
         empty_spots = [(x, y) for x in range(3) for y in range(3) if board[x][y] is None]
-        return random.choice(empty_spots) if empty_spots else (0, 0)
+        move = random.choice(empty_spots) if empty_spots else (0, 0)
+        self.record_first_move(move, self.check_winner(board, self.marker))
+        return move
+
+    def record_first_move(self, move, outcome):
+        super().record_first_move(move, outcome)
+        if self.first_move is not None:
+            pass
 
 def print_board(board):
     print("  0 1 2")
@@ -106,6 +120,17 @@ class TicTacToeGame:
 
         self.current_player, self.other_player = self.other_player, self.current_player
 
+    def record_winner(self, winner):
+        if winner:
+            with open(self.database_file, mode='a', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow([winner])
+
+            # Log additional data
+            if self.current_player.first_move is not None:
+                self.log_data[-1]['first_move'] = self.current_player.first_move
+                self.log_data[-1]['outcome'] = self.current_player.outcome
+                
     def get_winner(self):
         for row in self.board:
             if row[0] == row[1] == row[2] and row[0] is not None:
@@ -157,18 +182,18 @@ class Bot(Player):
 class HumanPlayer(Player):
     def make_move(self, board):
         x, y = super().make_move(board)
-        self.record_winner(board, self.marker)
+        self.record_first_move((x, y), self.check_winner(board, self.marker))
         return x, y
 
-    def record_winner(self, board, marker):
-        winner = self.check_winner(board, marker)
-        if winner:
+    def record_first_move(self, move, outcome):
+        super().record_first_move(move, outcome)
+        if self.first_move is not None:
             with open(self.log_file, mode='a', newline='') as file:
-                writer = csv.DictWriter(file, fieldnames=['winner', 'player1', 'player2'])
+                writer = csv.DictWriter(file, fieldnames=['player', 'first_move', 'outcome'])
                 writer.writerow({
-                    'winner': winner,
-                    'player1': self.name if self.marker == 'X' else self.other_player.name,
-                    'player2': self.other_player.name if self.marker == 'X' else self.name,
+                    'player': self.name,
+                    'first_move': self.first_move,
+                    'outcome': self.outcome
                 })
 
     def check_winner(self, board, marker):
@@ -220,7 +245,7 @@ def main():
                 f.write(f"{player1.name}: {len([data['winner'] for data in game.log_data if data['winner'] == player1.marker])} wins\n")
                 f.write(f"{player2.name}: {len([data['winner'] for data in game.log_data if data['winner'] == player2.marker])} wins\n")
                 f.write(f"Total Games: {len(game.log_data)}\n")
-                f.write(f"Draws: {len([data['winner'] for data in game.log_data if data['winner'] is None])}\n")
+                f.write(f"Draws: {len([data['winner'] for data in game.log_data if data['winner'] is None])}\n
             break
         if game.is_draw():
             game.save_log(log_file)
