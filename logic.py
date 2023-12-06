@@ -72,9 +72,9 @@ def print_board(board):
         print(f"{i} {' '.join(print_row)}")
 
 def main():
-    player1 = Player('X')
-    player2 = Bot('O')
-    game = TicTacToeGame(player1, player2)
+    player1 = Player('X', 'Player 1')  
+    player2 = Bot('O', 'Bot 1')
+    game = TicTacToeGame(player1, player2, database_file)
 
     while True:
         print_board(game.board)
@@ -245,7 +245,7 @@ def main():
                 f.write(f"{player1.name}: {len([data['winner'] for data in game.log_data if data['winner'] == player1.marker])} wins\n")
                 f.write(f"{player2.name}: {len([data['winner'] for data in game.log_data if data['winner'] == player2.marker])} wins\n")
                 f.write(f"Total Games: {len(game.log_data)}\n")
-                f.write(f"Draws: {len([data['winner'] for data in game.log_data if data['winner'] is None])}\n
+                f.write(f"Draws: {len([data['winner'] for data in game.log_data if data['winner'] is None])}\n")
             break
         if game.is_draw():
             game.save_log(log_file)
